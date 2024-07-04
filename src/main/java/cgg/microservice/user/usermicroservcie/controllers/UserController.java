@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import cgg.microservice.user.usermicroservcie.entities.Rating;
 import cgg.microservice.user.usermicroservcie.entities.User;
+import cgg.microservice.user.usermicroservcie.external.services.RatingService;
 import cgg.microservice.user.usermicroservcie.services.UserService;
 import lombok.AllArgsConstructor;
 
@@ -21,6 +23,7 @@ import lombok.AllArgsConstructor;
 public class UserController {
 
     private UserService userService;
+
     // create
 
     @PostMapping
@@ -42,6 +45,12 @@ public class UserController {
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> allUsers = userService.getAllUsers();
         return ResponseEntity.ok(allUsers);
+    }
+
+    @PostMapping("/ratings")
+    ResponseEntity<Rating> createRating(@RequestBody Rating rating) {
+
+        return ResponseEntity.ok(userService.createRating(rating));
     }
 
 }

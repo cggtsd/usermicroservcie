@@ -2,6 +2,7 @@ package cgg.microservice.user.usermicroservcie.services;
 
 import java.util.List;
 
+import cgg.microservice.user.usermicroservcie.entities.Rating;
 import cgg.microservice.user.usermicroservcie.entities.User;
 
 public interface UserService {
@@ -19,5 +20,7 @@ public interface UserService {
 
     // TODO: delete
     // TODO: update
+
+    Rating createRating(Rating rating);
 
 }
