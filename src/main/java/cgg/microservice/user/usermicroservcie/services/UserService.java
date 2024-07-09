@@ -21,6 +21,6 @@ public interface UserService {
     // TODO: delete
     // TODO: update
 
-    Rating createRating(Rating rating);
+    // Rating createRating(Rating rating);
 
 }

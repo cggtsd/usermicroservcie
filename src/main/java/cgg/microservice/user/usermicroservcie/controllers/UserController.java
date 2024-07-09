@@ -15,11 +15,13 @@ import cgg.microservice.user.usermicroservcie.entities.Rating;
 import cgg.microservice.user.usermicroservcie.entities.User;
 import cgg.microservice.user.usermicroservcie.external.services.RatingService;
 import cgg.microservice.user.usermicroservcie.services.UserService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 
 @RestController
 @RequestMapping("/users")
 @AllArgsConstructor
+@Tag(name = "User Controller", description = "This is User Servcie Apis")
 public class UserController {
 
     private UserService userService;
@@ -47,10 +49,10 @@ public class UserController {
         return ResponseEntity.ok(allUsers);
     }
 
-    @PostMapping("/ratings")
-    ResponseEntity<Rating> createRating(@RequestBody Rating rating) {
+    // @PostMapping("/ratings")
+    // ResponseEntity<Rating> createRating(@RequestBody Rating rating) {
 
-        return ResponseEntity.ok(userService.createRating(rating));
-    }
+    // return ResponseEntity.ok(userService.createRating(rating));
+    // }
 
 }

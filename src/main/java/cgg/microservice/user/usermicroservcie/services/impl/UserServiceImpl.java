@@ -1,20 +1,17 @@
 package cgg.microservice.user.usermicroservcie.services.impl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
 import cgg.microservice.user.usermicroservcie.entities.Hotel;
 import cgg.microservice.user.usermicroservcie.entities.Rating;
 import cgg.microservice.user.usermicroservcie.entities.User;
 import cgg.microservice.user.usermicroservcie.exceptions.ResourceNotFoundException;
-import cgg.microservice.user.usermicroservcie.external.services.HotelService;
-import cgg.microservice.user.usermicroservcie.external.services.RatingService;
 import cgg.microservice.user.usermicroservcie.repositories.UserRepository;
 import cgg.microservice.user.usermicroservcie.services.UserService;
 import lombok.AllArgsConstructor;
@@ -27,8 +24,9 @@ public class UserServiceImpl implements UserService {
 
     private UserRepository userRepository;
     private RestTemplate restTemplate;
-    private HotelService hotelServcie;
-    private RatingService ratingService;
+    // private HotelService hotelServcie;
+    // private RatingService ratingService;
+    private RestClient restClient;
 
     @Override
     public User saveUser(User user) {
@@ -58,7 +56,10 @@ public class UserServiceImpl implements UserService {
                 // Hotel.class);
                 // Hotel hotel = forEntity.getBody();
                 // log.info("Response status code {}: ", forEntity.getStatusCode());
-                Hotel hotel = hotelServcie.getHotel(rating.getHotelId());
+                // Hotel hotel = hotelServcie.getHotel(rating.getHotelId());
+                Hotel hotel = restClient.get().uri("http://localhost:8082/hotels/" + rating.getHotelId())
+                        .retrieve().body(Hotel.class);
+
                 // set hotel in rating
                 rating.setHotel(hotel);
 
@@ -91,8 +92,10 @@ public class UserServiceImpl implements UserService {
             // Hotel.class);
             // Hotel hotel = forEntity.getBody();
             // log.info("Response status code {}: ", forEntity.getStatusCode());
-            Hotel hotel = hotelServcie.getHotel(rating.getHotelId());
+            // Hotel hotel = hotelServcie.getHotel(rating.getHotelId());
             // set hotel in rating
+            Hotel hotel = restClient.get().uri("http://HOTELMICROSERVICE/hotels/" + rating.getHotelId())
+                    .retrieve().body(Hotel.class);
             rating.setHotel(hotel);
 
             return rating;
@@ -104,11 +107,11 @@ public class UserServiceImpl implements UserService {
 
     }
 
-    @Override
-    public Rating createRating(Rating rating) {
+    // @Override
+    // public Rating createRating(Rating rating) {
 
-        return ratingService.create(rating).getBody();
+    // return ratingService.create(rating).getBody();
 
-    }
+    // }
 
 }
