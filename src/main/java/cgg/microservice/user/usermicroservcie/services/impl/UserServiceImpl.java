@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
@@ -20,13 +22,18 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @AllArgsConstructor
 @Slf4j
+@RefreshScope
 public class UserServiceImpl implements UserService {
 
     private UserRepository userRepository;
+
     private RestTemplate restTemplate;
     // private HotelService hotelServcie;
     // private RatingService ratingService;
-    private RestClient restClient;
+    private RestClient.Builder restClient;
+
+    @Value("${microservices.user-service.endpoints.endpoint.uri}")
+    private String[] endpointUrls;
 
     @Override
     public User saveUser(User user) {
@@ -41,7 +48,7 @@ public class UserServiceImpl implements UserService {
                     () -> new ResourceNotFoundException("User with given id not found on server !!: " + userMap
                             .getUserId()));
             // api call to Rating Servcie to get the rating data
-            Rating[] ratingsOfUser = restTemplate.getForObject("http://RATINGSERVICE/ratings/users/" + userMap
+            Rating[] ratingsOfUser = restTemplate.getForObject(endpointUrls[0] + "ratings/users/" + userMap
                     .getUserId(),
                     Rating[].class);
 
@@ -57,7 +64,7 @@ public class UserServiceImpl implements UserService {
                 // Hotel hotel = forEntity.getBody();
                 // log.info("Response status code {}: ", forEntity.getStatusCode());
                 // Hotel hotel = hotelServcie.getHotel(rating.getHotelId());
-                Hotel hotel = restClient.get().uri("http://localhost:8082/hotels/" + rating.getHotelId())
+                Hotel hotel = restClient.build().get().uri(endpointUrls[1] + "hotels/" + rating.getHotelId())
                         .retrieve().body(Hotel.class);
 
                 // set hotel in rating
@@ -78,7 +85,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new ResourceNotFoundException("User with given id not found on server !!: " + userId));
         // api call to Rating Servcie to get the rating data
-        Rating[] ratingsOfUser = restTemplate.getForObject("http://RATINGSERVICE/ratings/users/" + userId,
+        Rating[] ratingsOfUser = restTemplate.getForObject(endpointUrls[0] + "ratings/users/" + userId,
                 Rating[].class);
 
         List<Rating> ratings = Arrays.stream(ratingsOfUser).toList();
@@ -94,7 +101,7 @@ public class UserServiceImpl implements UserService {
             // log.info("Response status code {}: ", forEntity.getStatusCode());
             // Hotel hotel = hotelServcie.getHotel(rating.getHotelId());
             // set hotel in rating
-            Hotel hotel = restClient.get().uri("http://HOTELMICROSERVICE/hotels/" + rating.getHotelId())
+            Hotel hotel = restClient.build().get().uri(endpointUrls[1] + "hotels/" + rating.getHotelId())
                     .retrieve().body(Hotel.class);
             rating.setHotel(hotel);
 

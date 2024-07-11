@@ -3,6 +3,7 @@ package cgg.microservice.user.usermicroservcie.config;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
@@ -16,6 +17,7 @@ public class MyConfig {
 
     @Bean
     @LoadBalanced
+    @Lazy
     RestTemplate restTemplate() {
         return new RestTemplate();
     }
@@ -24,6 +26,13 @@ public class MyConfig {
     RestClient getClient() {
 
         return RestClient.create();
+    }
+
+    @Bean
+    @LoadBalanced
+    @Lazy
+    RestClient.Builder getRestClientBuikder() {
+        return RestClient.builder();
     }
 
     @Bean

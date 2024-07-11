@@ -15,13 +15,16 @@ import cgg.microservice.user.usermicroservcie.entities.Rating;
 import cgg.microservice.user.usermicroservcie.entities.User;
 import cgg.microservice.user.usermicroservcie.external.services.RatingService;
 import cgg.microservice.user.usermicroservcie.services.UserService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/users")
 @AllArgsConstructor
 @Tag(name = "User Controller", description = "This is User Servcie Apis")
+@Slf4j
 public class UserController {
 
     private UserService userService;
@@ -37,9 +40,21 @@ public class UserController {
 
     // get single user
     @GetMapping("/{userId}")
+    @CircuitBreaker(name = "ratingHotelBreaker", fallbackMethod = "ratingHotelFallback")
     public ResponseEntity<User> getSingleUser(@PathVariable String userId) {
         User user = userService.getUser(userId);
         return ResponseEntity.ok(user);
+    }
+
+    // creating fallback method
+
+    public ResponseEntity<User> ratingHotelFallback(String userId, Exception ex) {
+        log.info("Fallback method because some servcie is down : {] }", ex.getMessage());
+        User user = User.builder().name("Dummy")
+                .email("dummy@gmail.com")
+                .about("this is dummy user ")
+                .userId("12234").build();
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     // get all users
