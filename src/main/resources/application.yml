@@ -28,9 +28,22 @@ management:
       show-details: always
 
 resilience4j:
+  # circuitbreaker:
+  #   instances:
+  #     ratingHotelBreaker:
+  #      register-health-indicator: true
+  #      event-consumer-buffer-size: 10
+  #      failure-rate-threshold: 50
+  #      minimum-number-of-calls: 5
+  #      automatic-transition-from-open-to-half-open-enabled: true
+  #      wait-duration-in-open-state: 60s
+  #      permitted-number-of-calls-in-half-open-state: 3
+  #      sliding-window-size: 10
+  #      sliding-window-type: COUNT_BASED  
   circuitbreaker:
-    instances:
-      ratingHotelBreaker:
+    circuit-breaker-aspect-order: 1
+    configs:
+      default:
        register-health-indicator: true
        event-consumer-buffer-size: 10
        failure-rate-threshold: 50
@@ -39,7 +52,29 @@ resilience4j:
        wait-duration-in-open-state: 60s
        permitted-number-of-calls-in-half-open-state: 3
        sliding-window-size: 10
-       sliding-window-type: COUNT_BASED                 
+       sliding-window-type: COUNT_BASED 
+    instances:
+       ratingHotelBreaker:
+        base-config: default
+       ratingHotelListBreaker:
+        base-config: default  
+        
+  retry:
+   retry-aspect-order: 2
+   instances:
+    ratingHotelService:
+     maxAttempts: 5
+     waitDuration: 15s
+  rateLimiter:
+   instances:
+    ratingHotelLimiter:
+     limitRefreshPeriod: 4s
+     limitForPeriod: 2
+     timeoutDuration: 2s
+        
+
+   
+                      
 
 
 
