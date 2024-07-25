@@ -61,7 +61,7 @@ public class UserController {
 
     public ResponseEntity<User> ratingHotelFallback(String userId, Exception ex) {
         log.info("Fallback method because some servcie is down : {] }", ex.getMessage());
-
+        ex.printStackTrace();
         User user = User.builder().name("Dummy")
                 .email("dummy@gmail.com")
                 .about("this is dummy user ")

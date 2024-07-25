@@ -1,25 +1,52 @@
 package cgg.microservice.user.usermicroservcie.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClient.Builder;
 import org.springframework.web.client.RestTemplate;
 
+import cgg.microservice.user.usermicroservcie.config.interceptors.RestTemplateInterceptor;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
+import lombok.AllArgsConstructor;
 
 @Configuration
+@AllArgsConstructor
 public class MyConfig {
 
+    private ClientRegistrationRepository clientRegistrationRepository;
+    private OAuth2AuthorizedClientRepository oAuth2AuthorizedClientRepository;
+
+    /**
+     * @return
+     */
     @Bean
     @LoadBalanced
     @Lazy
     RestTemplate restTemplate() {
-        return new RestTemplate();
+        RestTemplate restTemplate = new RestTemplate();
+
+        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
+        interceptors.add(
+                new RestTemplateInterceptor(manager(clientRegistrationRepository, oAuth2AuthorizedClientRepository)));
+
+        restTemplate.setInterceptors(interceptors);
+        return restTemplate;
     }
 
     @Bean
@@ -32,7 +59,11 @@ public class MyConfig {
     @LoadBalanced
     @Lazy
     RestClient.Builder getRestClientBuikder() {
-        return RestClient.builder();
+        RestClient.Builder builder = RestClient.builder();
+
+        builder.requestInterceptor(
+                new RestTemplateInterceptor(manager(clientRegistrationRepository, oAuth2AuthorizedClientRepository)));
+        return builder;
     }
 
     @Bean
@@ -45,6 +76,20 @@ public class MyConfig {
                 .externalDocs(new ExternalDocumentation()
                         .description("SpringShop Wiki Documentation")
                         .url("https://springshop.wiki.github.org/docs"));
+    }
+
+    @Bean
+    OAuth2AuthorizedClientManager manager(
+            ClientRegistrationRepository clientRegistrationRepository,
+            OAuth2AuthorizedClientRepository oAuth2AuthorizedClientRepository) {
+
+        OAuth2AuthorizedClientProvider provider = OAuth2AuthorizedClientProviderBuilder.builder().clientCredentials()
+                .build();
+        DefaultOAuth2AuthorizedClientManager defaultOAuth2AuthorizedClientManager = new DefaultOAuth2AuthorizedClientManager(
+                clientRegistrationRepository, oAuth2AuthorizedClientRepository);
+        defaultOAuth2AuthorizedClientManager.setAuthorizedClientProvider(provider);
+        return defaultOAuth2AuthorizedClientManager;
+
     }
 
 }

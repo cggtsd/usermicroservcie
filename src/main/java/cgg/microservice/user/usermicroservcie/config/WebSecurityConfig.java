@@ -15,6 +15,7 @@ public class WebSecurityConfig {
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http.authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                .oauth2Client(Customizer.withDefaults())
                 .oauth2ResourceServer(rs -> rs.jwt(Customizer.withDefaults()));
 
         return http.build();
